@@ -379,6 +379,7 @@
     // 問題数管理
     let totalQuestions = 5;
     let currentQuestionNum = 0;
+    let questionQueue = []; // 出題用キュー
 
     let audioCtx = null;
 
@@ -459,6 +460,15 @@
         if (val > 10) val = 10;
         qCountInput.value = val;
     }
+    
+    // 配列シャッフル用関数 (Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
     function startGame(num) {
         initAudio();
@@ -472,6 +482,11 @@
         totalQuestions = parseInt(qCountInput.value);
         currentQuestionNum = 0;
         currentPlayerIndex = 0;
+        
+        // 出題用リストの準備（シャッフルしてキューに入れる）
+        const baseList = [...vocabularyData[selectedLesson]];
+        shuffleArray(baseList);
+        questionQueue = baseList;
         
         setupScreen.style.display = "none";
         resultScreen.style.display = "none";
@@ -494,9 +509,16 @@
 
         messageEl.innerText = "";
         
-        // 選択されたレッスンの単語リストを取得
-        const currentList = vocabularyData[selectedLesson];
-        const rawWord = currentList[Math.floor(Math.random() * currentList.length)];
+        // キューから単語を取得（なければランダムフォールバック）
+        let rawWord;
+        if (questionQueue.length > 0) {
+            rawWord = questionQueue.pop();
+        } else {
+            // 万が一足りなくなった場合（通常ありえないが念のため）
+            const currentList = vocabularyData[selectedLesson];
+            rawWord = currentList[Math.floor(Math.random() * currentList.length)];
+        }
+        
         currentWord = rawWord.toUpperCase();
         
         renderScoreboard();
