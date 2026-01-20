@@ -141,7 +141,18 @@
             z-index: 5;
         }
 
-        .p-name { font-size: 12px; font-weight: bold; color: #555; }
+        .p-name { 
+            font-size: 14px; 
+            font-weight: bold; 
+            color: #555; 
+            cursor: pointer; /* クリックできることを示す */
+            border-bottom: 1px dashed #aaa; /* 下線で変更可能を示唆 */
+            padding-bottom: 2px;
+        }
+        .p-name:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
         .p-score { font-size: 40px; font-weight: bold; color: var(--correct); line-height: 1.2; }
 
         /* スコアポップアップ */
@@ -411,7 +422,9 @@
         initAudio();
         players = [];
         for(let i=1; i<=num; i++) {
-            players.push({ id: i, score: 0 });
+            // 初期名をセット（1人ならYOU、複数ならP1, P2...）
+            let defaultName = num === 1 ? "YOU" : `P${i}`;
+            players.push({ id: i, score: 0, name: defaultName });
         }
         
         totalQuestions = parseInt(qCountInput.value);
@@ -492,10 +505,9 @@
             } else if (index === 1) rankEmoji = "🥈 ";
             else if (index === 2) rankEmoji = "🥉 ";
 
-            const nameText = players.length === 1 ? "YOU" : `Player ${p.id}`;
-            
+            // 結果画面でも変更後の名前を表示
             row.innerHTML = `
-                <span>${rankEmoji}${nameText}</span>
+                <span>${rankEmoji}${p.name}</span>
                 <span>${p.score} pts</span>
             `;
             finalScoresEl.appendChild(row);
@@ -517,7 +529,12 @@
             
             const name = document.createElement("div");
             name.className = "p-name";
-            name.innerText = players.length === 1 ? "YOU" : `P${p.id}`;
+            name.innerText = p.name; // 名前を表示
+            name.title = "Click to rename";
+            name.onclick = (e) => { // 名前変更機能
+                e.stopPropagation();
+                renamePlayer(index);
+            };
             
             const score = document.createElement("div");
             score.className = "p-score";
@@ -527,6 +544,20 @@
             card.appendChild(score);
             scoreboardEl.appendChild(card);
         });
+    }
+    
+    // 名前変更関数
+    function renamePlayer(index) {
+        const currentName = players[index].name;
+        const newName = prompt("Enter new name for Player:", currentName);
+        if (newName && newName.trim() !== "") {
+            players[index].name = newName.trim();
+            renderScoreboard();
+            // 自分のターンの場合、メッセージも更新
+            if (!isRoundOver && index === currentPlayerIndex) {
+                announceTurn();
+            }
+        }
     }
 
     function showScorePopup(points, playerIndex) {
@@ -626,7 +657,7 @@
     function announceTurn() {
         if (isRoundOver) return;
         if (players.length > 1) {
-            messageEl.innerText = `Player ${players[currentPlayerIndex].id}'s Turn`;
+            messageEl.innerText = `${players[currentPlayerIndex].name}'s Turn`;
         } else {
             messageEl.innerText = "Good luck!";
         }
@@ -644,7 +675,7 @@
             showScorePopup(bonus, currentPlayerIndex);
 
             messageEl.innerText = players.length > 1 
-                ? `Player ${players[currentPlayerIndex].id} Cleared!` 
+                ? `${players[currentPlayerIndex].name} Cleared!` 
                 : "Perfect! Great Job!";
             messageEl.style.color = "var(--correct)";
             
