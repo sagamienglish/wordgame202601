@@ -35,9 +35,19 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: relative;
             z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
         }
         
         h1 { margin: 0; font-size: 20px; color: #444; }
+        
+        #round-info {
+            position: absolute; right: 20px;
+            font-weight: bold; color: var(--accent);
+            font-size: 16px;
+        }
 
         /* --- セットアップ画面 --- */
         #setup-screen {
@@ -47,6 +57,22 @@
             z-index: 2000;
             transition: opacity 0.3s;
         }
+        
+        .setup-group {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* 問題数選択スライダー/入力 */
+        .question-selector {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            margin-top: 10px;
+        }
+        input[type=number] {
+            font-size: 24px; padding: 5px; width: 80px; text-align: center;
+            border: 2px solid var(--accent); border-radius: 8px;
+        }
+
         .player-btn {
             font-size: 1.5rem; padding: 15px 30px; margin: 10px;
             background: var(--accent); color: white; border: none; border-radius: 50px;
@@ -67,6 +93,25 @@
             position: relative;
         }
 
+        /* --- 結果画面 --- */
+        #result-screen {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 3000;
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        
+        .result-title { font-size: 40px; color: var(--correct); margin-bottom: 30px; font-weight: bold; }
+        .result-list { width: 90%; max-width: 500px; margin-bottom: 40px; }
+        .result-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; border-bottom: 1px solid #ddd;
+            font-size: 24px; font-weight: bold; color: #555;
+        }
+        .result-item.winner { color: #ff9800; font-size: 32px; border-bottom: 3px solid #ff9800; }
+        .rank-badge { margin-right: 15px; }
+
         /* スコアボード */
         #scoreboard {
             display: flex;
@@ -85,6 +130,7 @@
             min-width: 80px;
             display: flex; flex-direction: column; align-items: center;
             transition: all 0.3s;
+            position: relative;
         }
         
         .player-card.active {
@@ -96,7 +142,29 @@
         }
 
         .p-name { font-size: 12px; font-weight: bold; color: #555; }
-        .p-score { font-size: 20px; font-weight: bold; color: var(--correct); }
+        .p-score { font-size: 40px; font-weight: bold; color: var(--correct); line-height: 1.2; }
+
+        /* スコアポップアップ */
+        .score-popup {
+            position: absolute;
+            color: #ff9800;
+            font-weight: bold;
+            font-size: 32px;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            z-index: 20;
+            text-shadow: 2px 2px 0 #fff;
+            width: 100%;
+            text-align: center;
+            top: -10px;
+            left: 0;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-40px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-60px) scale(1.0); opacity: 0; }
+        }
 
         /* メッセージエリア */
         #info-bar { margin: 5px 0; min-height: 30px;}
@@ -111,7 +179,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin: 10px 0 20px 0;
+            margin: 10px 0 10px 0;
             padding: 0 20px;
             flex-grow: 1;
             align-content: center;
@@ -130,7 +198,6 @@
         .char-box.revealed { color: #333; }
         .char-box.space { border-bottom: none; width: 20px; }
         
-        /* アニメーション用クラス */
         .anim-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .anim-shake { animation: shake 0.4s; }
 
@@ -139,7 +206,6 @@
             50% { transform: scale(1.4); color: var(--correct); }
             100% { transform: scale(1); }
         }
-        
         @keyframes shake {
             0% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -149,7 +215,7 @@
         }
 
         /* キーボード */
-        #keyboard { width: 100%; max-width: 700px; padding: 5px; padding-bottom: 20px; box-sizing: border-box; }
+        #keyboard { width: 100%; max-width: 700px; padding: 5px; box-sizing: border-box; }
         .key-row { display: flex; justify-content: center; margin-bottom: 5px; }
         .key {
             font-weight: bold; border: none; margin: 0 3px;
@@ -166,17 +232,25 @@
         .key:disabled { cursor: default; }
 
         /* コントロールボタン */
-        #game-controls { margin-bottom: 10px; display: flex; justify-content: center; gap: 15px; }
+        #game-controls { 
+            margin-top: 10px; 
+            margin-bottom: 20px; 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            min-height: 40px;
+        }
         .ctrl-btn {
             padding: 10px 24px; font-size: 16px;
             background-color: var(--accent); color: white; border: none;
             border-radius: 25px; cursor: pointer;
-            display: none; /* 初期非表示 */
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             transition: background 0.2s;
         }
         .ctrl-btn:hover { background-color: #1976D2; }
-        .ctrl-btn.reset { background-color: #757575; font-size: 14px; display: inline-block; } /* 常時表示に変更 */
+        .ctrl-btn.reset { background-color: #757575; font-size: 14px; }
+        
+        #action-btn { display: inline-block; } /* 常時表示 */
 
     </style>
 </head>
@@ -184,38 +258,57 @@
 
 <!-- Setup Screen -->
 <div id="setup-screen">
-    <h2 style="font-size: 28px; color:#333; margin-bottom:10px;">Vocabulary Game</h2>
-    <p style="margin-bottom:30px; color:#666;">Select Number of Players</p>
-    <div style="display:flex; flex-wrap:wrap; justify-content:center; max-width:600px;">
-        <button class="player-btn" onclick="startGame(1)">1 Player</button>
-        <button class="player-btn" onclick="startGame(2)">2 Players</button>
-        <button class="player-btn" onclick="startGame(3)">3 Players</button>
-        <button class="player-btn" onclick="startGame(4)">4 Players</button>
-        <button class="player-btn" onclick="startGame(5)">5 Players</button>
-        <button class="player-btn" onclick="startGame(6)">6 Players</button>
+    <h2 style="font-size: 28px; color:#333; margin-bottom:10px;">Vocabulary Game Setup</h2>
+    
+    <div class="setup-group">
+        <label style="font-size: 18px; color: #666; font-weight:bold;">Number of Questions</label>
+        <div class="question-selector">
+            <button onclick="adjustQuestions(-1)" style="font-size:20px; width:40px; height:40px; border-radius:50%; border:1px solid #ccc; background:white;">-</button>
+            <input type="number" id="question-count" min="1" max="10" value="5" readonly>
+            <button onclick="adjustQuestions(1)" style="font-size:20px; width:40px; height:40px; border-radius:50%; border:1px solid #ccc; background:white;">+</button>
+        </div>
+    </div>
+
+    <div class="setup-group">
+        <p style="margin-bottom:10px; color:#666; font-weight:bold;">Select Players</p>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; max-width:600px;">
+            <button class="player-btn" onclick="startGame(1)">1 Player</button>
+            <button class="player-btn" onclick="startGame(2)">2 Players</button>
+            <button class="player-btn" onclick="startGame(3)">3 Players</button>
+            <button class="player-btn" onclick="startGame(4)">4 Players</button>
+            <button class="player-btn" onclick="startGame(5)">5 Players</button>
+            <button class="player-btn" onclick="startGame(6)">6 Players</button>
+        </div>
     </div>
 </div>
 
+<!-- Result Screen -->
+<div id="result-screen">
+    <div class="result-title">🏆 Result 🏆</div>
+    <div class="result-list" id="final-scores"></div>
+    <button class="ctrl-btn" onclick="backToTitle()">Back to Title</button>
+</div>
+
 <header>
-    <h1>Classroom Vocabulary Challenge</h1>
+    <h1>Classroom Vocabulary</h1>
+    <div id="round-info">Q: 0/0</div>
 </header>
 
 <div id="game-screen">
-    <!-- スコアボード -->
     <div id="scoreboard"></div>
 
     <div id="info-bar">
         <div id="message"></div>
     </div>
 
-    <div id="game-controls">
-        <button class="ctrl-btn" id="next-btn" onclick="nextRound()">Next Word ➡</button>
-        <button class="ctrl-btn reset" onclick="backToTitle()">EXIT / TITLE</button>
-    </div>
-
     <div id="word-container"></div>
 
     <div id="keyboard"></div>
+
+    <div id="game-controls">
+        <button class="ctrl-btn" id="action-btn" onclick="handleActionClick()">Next Word ➡</button>
+        <button class="ctrl-btn reset" onclick="backToTitle()">EXIT</button>
+    </div>
 </div>
 
 <script>
@@ -237,18 +330,25 @@
     let revealedCount = 0;
     let totalChars = 0;
     let isRoundOver = false;
+    
+    // 問題数管理
+    let totalQuestions = 5;
+    let currentQuestionNum = 0;
 
-    // 音声コンテキスト（ユーザー操作後に初期化）
     let audioCtx = null;
 
     // DOM要素
     const setupScreen = document.getElementById("setup-screen");
     const gameScreen = document.getElementById("game-screen");
+    const resultScreen = document.getElementById("result-screen");
     const scoreboardEl = document.getElementById("scoreboard");
     const wordContainer = document.getElementById("word-container");
     const keyboard = document.getElementById("keyboard");
     const messageEl = document.getElementById("message");
-    const nextBtn = document.getElementById("next-btn");
+    const actionBtn = document.getElementById("action-btn");
+    const roundInfoEl = document.getElementById("round-info");
+    const qCountInput = document.getElementById("question-count");
+    const finalScoresEl = document.getElementById("final-scores");
 
     const keysLayout = [
         "QWERTYUIOP",
@@ -256,7 +356,7 @@
         "ZXCVBNM"
     ];
 
-    // --- 音声生成関数 (Web Audio API) ---
+    // --- 音声生成関数 ---
     function initAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -268,32 +368,26 @@
 
     function playSound(type) {
         if (!audioCtx) initAudio();
-        
         const osc = audioCtx.createOscillator();
         const gainNode = audioCtx.createGain();
         osc.connect(gainNode);
         gainNode.connect(audioCtx.destination);
 
         if (type === "correct") {
-            // ピンポン！ (高めの2音)
             osc.type = "sine";
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
-            osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1); // C#6
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
         } else if (type === "wrong") {
-            // ブブー (低めの矩形波)
             osc.type = "sawtooth";
             osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
             osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
         } else if (type === "win") {
-            // ファンファーレ風
             osc.type = "triangle";
             osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C
             osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1); // E
@@ -301,36 +395,54 @@
             osc.frequency.setValueAtTime(1046, audioCtx.currentTime + 0.3); // C
             gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 1.0);
+            osc.start(); osc.stop(audioCtx.currentTime + 1.0);
         }
     }
 
-    // --- ゲームロジック ---
+    // --- セットアップ操作 ---
+    function adjustQuestions(delta) {
+        let val = parseInt(qCountInput.value) + delta;
+        if (val < 1) val = 1;
+        if (val > 10) val = 10;
+        qCountInput.value = val;
+    }
 
     function startGame(num) {
-        initAudio(); // 音声コンテキストの準備
+        initAudio();
         players = [];
         for(let i=1; i<=num; i++) {
             players.push({ id: i, score: 0 });
         }
+        
+        totalQuestions = parseInt(qCountInput.value);
+        currentQuestionNum = 0;
         currentPlayerIndex = 0;
         
         setupScreen.style.display = "none";
+        resultScreen.style.display = "none";
         gameScreen.style.display = "flex";
         
         nextRound();
     }
 
+    // --- ゲームフロー ---
+
     function nextRound() {
+        currentQuestionNum++;
+        
+        // 最終問題かどうかのチェックはボタン表示時に行うが、
+        // ここではラウンド初期化
         revealedCount = 0;
         isRoundOver = false;
-        nextBtn.style.display = "none";
         
-        // メッセージリセット
+        roundInfoEl.innerText = `Q: ${currentQuestionNum} / ${totalQuestions}`;
+        
+        // ボタン表示更新
+        updateActionButton();
+
         messageEl.innerText = "";
         
-        // 単語選択
+        // 単語選択（重複回避なしのランダム）
         const rawWord = wordList[Math.floor(Math.random() * wordList.length)];
         currentWord = rawWord.toUpperCase();
         
@@ -340,11 +452,65 @@
         announceTurn();
     }
 
+    function updateActionButton() {
+        // 現在の問題が最終問題かつ、ラウンド終了後なら「Show Result」
+        // それ以外は「Next Word」（パス機能含む）
+        if (currentQuestionNum >= totalQuestions) {
+             actionBtn.innerText = isRoundOver ? "Show Results 🏆" : "Pass / Results ➡";
+        } else {
+             actionBtn.innerText = "Next Word ➡";
+        }
+    }
+
+    function handleActionClick() {
+        // ボタンが押されたときの挙動
+        if (currentQuestionNum >= totalQuestions) {
+            // 最終問題でボタンを押した -> 結果画面へ
+            showResults();
+        } else {
+            // まだ次がある -> 次の問題へ
+            nextRound();
+        }
+    }
+
+    function showResults() {
+        gameScreen.style.display = "none";
+        resultScreen.style.display = "flex";
+        
+        // スコア順にソート
+        const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+        
+        finalScoresEl.innerHTML = "";
+        sortedPlayers.forEach((p, index) => {
+            const row = document.createElement("div");
+            row.className = "result-item";
+            
+            let rankEmoji = "";
+            if (index === 0) {
+                row.classList.add("winner");
+                rankEmoji = "👑 ";
+            } else if (index === 1) rankEmoji = "🥈 ";
+            else if (index === 2) rankEmoji = "🥉 ";
+
+            const nameText = players.length === 1 ? "YOU" : `Player ${p.id}`;
+            
+            row.innerHTML = `
+                <span>${rankEmoji}${nameText}</span>
+                <span>${p.score} pts</span>
+            `;
+            finalScoresEl.appendChild(row);
+        });
+        
+        playSound("win");
+    }
+
     function renderScoreboard() {
         scoreboardEl.innerHTML = "";
         players.forEach((p, index) => {
             const card = document.createElement("div");
             card.className = "player-card";
+            card.dataset.playerIndex = index;
+            
             if (index === currentPlayerIndex && !isRoundOver) {
                 card.classList.add("active");
             }
@@ -361,6 +527,17 @@
             card.appendChild(score);
             scoreboardEl.appendChild(card);
         });
+    }
+
+    function showScorePopup(points, playerIndex) {
+        const targetCard = document.querySelector(`.player-card[data-player-index="${playerIndex}"]`);
+        if (targetCard) {
+            const popup = document.createElement("div");
+            popup.className = "score-popup";
+            popup.innerText = "+" + points;
+            targetCard.appendChild(popup);
+            setTimeout(() => { popup.remove(); }, 1000);
+        }
     }
 
     function renderWord() {
@@ -400,8 +577,6 @@
 
     function handleGuess(char) {
         if (isRoundOver) return;
-        
-        // 音声初期化（初回タッチ対策）
         initAudio();
 
         const btn = document.getElementById(`key-${char}`);
@@ -409,44 +584,36 @@
         btn.disabled = true;
 
         if (currentWord.includes(char)) {
-            // --- 正解の場合 ---
             playSound("correct");
             let hitCount = 0;
             for (let i = 0; i < currentWord.length; i++) {
                 if (currentWord[i] === char) {
                     const box = document.getElementById(`char-${i}`);
-                    box.classList.add("revealed", "anim-pop"); // アニメーション追加
-                    // アニメーション終了後にクラス削除（再利用のため）
+                    box.classList.add("revealed", "anim-pop");
                     setTimeout(() => box.classList.remove("anim-pop"), 500);
                     hitCount++;
                 }
             }
             revealedCount += hitCount;
+            const gainedPoints = hitCount * 10;
+            players[currentPlayerIndex].score += gainedPoints;
             
-            // 得点: 1文字10点
-            players[currentPlayerIndex].score += (hitCount * 10);
-            btn.classList.add("correct");
-            
-            checkWin(); // 正解でもターン終了（下記switchTurn参照）
+            renderScoreboard(); 
+            showScorePopup(gainedPoints, currentPlayerIndex); 
 
+            btn.classList.add("correct");
+            checkWin(); 
         } else {
-            // --- 不正解の場合 ---
             playSound("wrong");
-            // 画面を揺らす
             document.body.classList.add("anim-shake");
             setTimeout(() => document.body.classList.remove("anim-shake"), 400);
 
             btn.classList.add("wrong");
+            renderScoreboard();
         }
 
-        renderScoreboard();
-
-        // ラウンド終了でなければ交代
-        if (!isRoundOver) {
-            // 1人プレイでなければ交代
-            if (players.length > 1) {
-                setTimeout(switchTurn, 500); // 少し待ってから交代
-            }
+        if (!isRoundOver && players.length > 1) {
+            setTimeout(switchTurn, 500);
         }
     }
 
@@ -460,7 +627,6 @@
         if (isRoundOver) return;
         if (players.length > 1) {
             messageEl.innerText = `Player ${players[currentPlayerIndex].id}'s Turn`;
-            messageEl.style.color = "#555";
         } else {
             messageEl.innerText = "Good luck!";
         }
@@ -471,44 +637,36 @@
             isRoundOver = true;
             playSound("win");
             
-            // クリアボーナス +50点 (最後の文字を開けた人に)
-            players[currentPlayerIndex].score += 50;
-            renderScoreboard();
+            const bonus = 50;
+            players[currentPlayerIndex].score += bonus;
             
+            renderScoreboard();
+            showScorePopup(bonus, currentPlayerIndex);
+
             messageEl.innerText = players.length > 1 
                 ? `Player ${players[currentPlayerIndex].id} Cleared!` 
                 : "Perfect! Great Job!";
             messageEl.style.color = "var(--correct)";
-            nextBtn.style.display = "inline-block";
             
-            // 全プレーヤーカードのアクティブを外す
+            // 全プレーヤーのアクティブ解除
             document.querySelectorAll(".player-card").forEach(c => c.classList.remove("active"));
-        }
-    }
-
-    // タイトルに戻る処理
-    function backToTitle() {
-        // 確認ダイアログ
-        if(confirm("Exit to title screen? Score will be lost.")) {
-            // 画面の切り替え
-            gameScreen.style.display = "none";
-            setupScreen.style.display = "flex";
             
-            // 状態のリセット
-            players = [];
-            currentWord = "";
-            wordContainer.innerHTML = "";
-            keyboard.innerHTML = "";
-            scoreboardEl.innerHTML = "";
-            messageEl.innerText = "";
-            currentPlayerIndex = 0;
-            isRoundOver = false;
+            updateActionButton();
         }
     }
 
-    // キーボード入力対応
+    function backToTitle() {
+        if(confirm("Exit to title screen?")) {
+            gameScreen.style.display = "none";
+            resultScreen.style.display = "none";
+            setupScreen.style.display = "flex";
+            players = [];
+            currentQuestionNum = 0;
+        }
+    }
+
     document.addEventListener("keydown", (e) => {
-        if (isRoundOver || setupScreen.style.display !== "none") return;
+        if (isRoundOver || gameScreen.style.display === "none") return;
         const key = e.key.toUpperCase();
         if (key.length === 1 && key >= "A" && key <= "Z") {
             handleGuess(key);
