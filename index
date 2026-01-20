@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Guessing Game (Fun Ver.)</title>
+    <style>
+        :root {
+            --correct: #6aaa64;
+            --wrong: #787c7e;
+            --bg: #f0f8ff;
+            --text: #333;
+            --accent: #2196F3;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        header {
+            background-color: white;
+            width: 100%;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        
+        h1 { margin: 0; font-size: 20px; color: #444; }
+
+        /* --- セットアップ画面 --- */
+        #setup-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 2000;
+            transition: opacity 0.3s;
+        }
+        .player-btn {
+            font-size: 1.5rem; padding: 15px 30px; margin: 10px;
+            background: var(--accent); color: white; border: none; border-radius: 50px;
+            cursor: pointer; width: 220px; transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .player-btn:hover { transform: scale(1.05); background: #1976D2; }
+        .player-btn:active { transform: scale(0.95); }
+
+        /* --- ゲーム画面 --- */
+        #game-screen {
+            display: none; /* JSで制御 */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding-top: 10px;
+            position: relative;
+        }
+
+        /* スコアボード */
+        #scoreboard {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 5px;
+            padding: 0 10px;
+        }
+
+        .player-card {
+            background: white; border: 2px solid #ddd;
+            border-radius: 8px; padding: 5px 15px;
+            min-width: 80px;
+            display: flex; flex-direction: column; align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .player-card.active {
+            border-color: var(--accent);
+            background-color: #e3f2fd;
+            transform: scale(1.15);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 5;
+        }
+
+        .p-name { font-size: 12px; font-weight: bold; color: #555; }
+        .p-score { font-size: 20px; font-weight: bold; color: var(--correct); }
+
+        /* メッセージエリア */
+        #info-bar { margin: 5px 0; min-height: 30px;}
+        #message {
+            font-size: 20px; font-weight: bold; color: #555;
+            transition: transform 0.2s;
+        }
+
+        /* 単語表示エリア */
+        #word-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 10px 0 20px 0;
+            padding: 0 20px;
+            flex-grow: 1;
+            align-content: center;
+        }
+
+        .char-box {
+            width: 40px; height: 50px;
+            border-bottom: 4px solid #555;
+            display: flex; justify-content: center; align-items: end;
+            font-size: 32px; font-weight: bold;
+            text-transform: uppercase;
+            color: transparent;
+            transition: color 0.3s, transform 0.2s;
+        }
+
+        .char-box.revealed { color: #333; }
+        .char-box.space { border-bottom: none; width: 20px; }
+        
+        /* アニメーション用クラス */
+        .anim-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .anim-shake { animation: shake 0.4s; }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); color: var(--correct); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* キーボード */
+        #keyboard { width: 100%; max-width: 700px; padding: 5px; padding-bottom: 20px; box-sizing: border-box; }
+        .key-row { display: flex; justify-content: center; margin-bottom: 5px; }
+        .key {
+            font-weight: bold; border: none; margin: 0 3px;
+            height: 50px; width: 9%; border-radius: 6px; cursor: pointer;
+            background-color: white; border: 1px solid #ccc;
+            color: #333; font-size: 18px;
+            box-shadow: 0 3px 0 #bbb;
+            touch-action: manipulation;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .key:active { transform: translateY(3px); box-shadow: none; }
+        .key.correct { background-color: var(--correct); color: white; border-color: var(--correct); box-shadow: 0 3px 0 #4cae4c; }
+        .key.wrong { background-color: var(--wrong); color: white; border-color: var(--wrong); opacity: 0.5; box-shadow: none; transform: translateY(3px);}
+        .key:disabled { cursor: default; }
+
+        /* コントロールボタン */
+        #game-controls { margin-bottom: 10px; display: flex; justify-content: center; gap: 15px; }
+        .ctrl-btn {
+            padding: 10px 24px; font-size: 16px;
+            background-color: var(--accent); color: white; border: none;
+            border-radius: 25px; cursor: pointer;
+            display: none; /* 初期非表示 */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+        .ctrl-btn:hover { background-color: #1976D2; }
+        .ctrl-btn.reset { background-color: #757575; font-size: 14px; display: inline-block; } /* 常時表示に変更 */
+
+    </style>
+</head>
+<body>
+
+<!-- Setup Screen -->
+<div id="setup-screen">
+    <h2 style="font-size: 28px; color:#333; margin-bottom:10px;">Vocabulary Game</h2>
+    <p style="margin-bottom:30px; color:#666;">Select Number of Players</p>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; max-width:600px;">
+        <button class="player-btn" onclick="startGame(1)">1 Player</button>
+        <button class="player-btn" onclick="startGame(2)">2 Players</button>
+        <button class="player-btn" onclick="startGame(3)">3 Players</button>
+        <button class="player-btn" onclick="startGame(4)">4 Players</button>
+        <button class="player-btn" onclick="startGame(5)">5 Players</button>
+        <button class="player-btn" onclick="startGame(6)">6 Players</button>
+    </div>
+</div>
+
+<header>
+    <h1>Classroom Vocabulary Challenge</h1>
+</header>
+
+<div id="game-screen">
+    <!-- スコアボード -->
+    <div id="scoreboard"></div>
+
+    <div id="info-bar">
+        <div id="message"></div>
+    </div>
+
+    <div id="game-controls">
+        <button class="ctrl-btn" id="next-btn" onclick="nextRound()">Next Word ➡</button>
+        <button class="ctrl-btn reset" onclick="backToTitle()">EXIT / TITLE</button>
+    </div>
+
+    <div id="word-container"></div>
+
+    <div id="keyboard"></div>
+</div>
+
+<script>
+    // 語彙リスト
+    const wordList = [
+        "newscaster", "spectator", "stare", "screen", "venue",
+        "participate", "set up", "compete", "organized", "term",
+        "popularity", "official", "sharply", "scholarship", "competition",
+        "committee", "commentator", "physical", "mental", "quick",
+        "response", "concentration", "strategy", "visa", "advantage",
+        "teamwork", "although", "afraid", "waste", "government",
+        "recognize", "strength"
+    ];
+
+    // ゲーム状態
+    let players = [];
+    let currentPlayerIndex = 0;
+    let currentWord = "";
+    let revealedCount = 0;
+    let totalChars = 0;
+    let isRoundOver = false;
+
+    // 音声コンテキスト（ユーザー操作後に初期化）
+    let audioCtx = null;
+
+    // DOM要素
+    const setupScreen = document.getElementById("setup-screen");
+    const gameScreen = document.getElementById("game-screen");
+    const scoreboardEl = document.getElementById("scoreboard");
+    const wordContainer = document.getElementById("word-container");
+    const keyboard = document.getElementById("keyboard");
+    const messageEl = document.getElementById("message");
+    const nextBtn = document.getElementById("next-btn");
+
+    const keysLayout = [
+        "QWERTYUIOP",
+        "ASDFGHJKL",
+        "ZXCVBNM"
+    ];
+
+    // --- 音声生成関数 (Web Audio API) ---
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playSound(type) {
+        if (!audioCtx) initAudio();
+        
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        if (type === "correct") {
+            // ピンポン！ (高めの2音)
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+            osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1); // C#6
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === "wrong") {
+            // ブブー (低めの矩形波)
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
+            osc.frequency.linearRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === "win") {
+            // ファンファーレ風
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C
+            osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1); // E
+            osc.frequency.setValueAtTime(784, audioCtx.currentTime + 0.2); // G
+            osc.frequency.setValueAtTime(1046, audioCtx.currentTime + 0.3); // C
+            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 1.0);
+        }
+    }
+
+    // --- ゲームロジック ---
+
+    function startGame(num) {
+        initAudio(); // 音声コンテキストの準備
+        players = [];
+        for(let i=1; i<=num; i++) {
+            players.push({ id: i, score: 0 });
+        }
+        currentPlayerIndex = 0;
+        
+        setupScreen.style.display = "none";
+        gameScreen.style.display = "flex";
+        
+        nextRound();
+    }
+
+    function nextRound() {
+        revealedCount = 0;
+        isRoundOver = false;
+        nextBtn.style.display = "none";
+        
+        // メッセージリセット
+        messageEl.innerText = "";
+        
+        // 単語選択
+        const rawWord = wordList[Math.floor(Math.random() * wordList.length)];
+        currentWord = rawWord.toUpperCase();
+        
+        renderScoreboard();
+        renderWord();
+        renderKeyboard();
+        announceTurn();
+    }
+
+    function renderScoreboard() {
+        scoreboardEl.innerHTML = "";
+        players.forEach((p, index) => {
+            const card = document.createElement("div");
+            card.className = "player-card";
+            if (index === currentPlayerIndex && !isRoundOver) {
+                card.classList.add("active");
+            }
+            
+            const name = document.createElement("div");
+            name.className = "p-name";
+            name.innerText = players.length === 1 ? "YOU" : `P${p.id}`;
+            
+            const score = document.createElement("div");
+            score.className = "p-score";
+            score.innerText = p.score;
+            
+            card.appendChild(name);
+            card.appendChild(score);
+            scoreboardEl.appendChild(card);
+        });
+    }
+
+    function renderWord() {
+        wordContainer.innerHTML = "";
+        totalChars = 0;
+        for (let i = 0; i < currentWord.length; i++) {
+            const char = currentWord[i];
+            const box = document.createElement("div");
+            box.classList.add("char-box");
+            box.id = `char-${i}`;
+            if (char === " ") {
+                box.classList.add("space");
+            } else {
+                box.innerText = char;
+                totalChars++;
+            }
+            wordContainer.appendChild(box);
+        }
+    }
+
+    function renderKeyboard() {
+        keyboard.innerHTML = "";
+        keysLayout.forEach(rowStr => {
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "key-row";
+            for (let char of rowStr) {
+                const btn = document.createElement("button");
+                btn.className = "key";
+                btn.innerText = char;
+                btn.id = `key-${char}`;
+                btn.onclick = () => handleGuess(char);
+                rowDiv.appendChild(btn);
+            }
+            keyboard.appendChild(rowDiv);
+        });
+    }
+
+    function handleGuess(char) {
+        if (isRoundOver) return;
+        
+        // 音声初期化（初回タッチ対策）
+        initAudio();
+
+        const btn = document.getElementById(`key-${char}`);
+        if (btn.disabled) return;
+        btn.disabled = true;
+
+        if (currentWord.includes(char)) {
+            // --- 正解の場合 ---
+            playSound("correct");
+            let hitCount = 0;
+            for (let i = 0; i < currentWord.length; i++) {
+                if (currentWord[i] === char) {
+                    const box = document.getElementById(`char-${i}`);
+                    box.classList.add("revealed", "anim-pop"); // アニメーション追加
+                    // アニメーション終了後にクラス削除（再利用のため）
+                    setTimeout(() => box.classList.remove("anim-pop"), 500);
+                    hitCount++;
+                }
+            }
+            revealedCount += hitCount;
+            
+            // 得点: 1文字10点
+            players[currentPlayerIndex].score += (hitCount * 10);
+            btn.classList.add("correct");
+            
+            checkWin(); // 正解でもターン終了（下記switchTurn参照）
+
+        } else {
+            // --- 不正解の場合 ---
+            playSound("wrong");
+            // 画面を揺らす
+            document.body.classList.add("anim-shake");
+            setTimeout(() => document.body.classList.remove("anim-shake"), 400);
+
+            btn.classList.add("wrong");
+        }
+
+        renderScoreboard();
+
+        // ラウンド終了でなければ交代
+        if (!isRoundOver) {
+            // 1人プレイでなければ交代
+            if (players.length > 1) {
+                setTimeout(switchTurn, 500); // 少し待ってから交代
+            }
+        }
+    }
+
+    function switchTurn() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        renderScoreboard();
+        announceTurn();
+    }
+    
+    function announceTurn() {
+        if (isRoundOver) return;
+        if (players.length > 1) {
+            messageEl.innerText = `Player ${players[currentPlayerIndex].id}'s Turn`;
+            messageEl.style.color = "#555";
+        } else {
+            messageEl.innerText = "Good luck!";
+        }
+    }
+
+    function checkWin() {
+        if (revealedCount === totalChars) {
+            isRoundOver = true;
+            playSound("win");
+            
+            // クリアボーナス +50点 (最後の文字を開けた人に)
+            players[currentPlayerIndex].score += 50;
+            renderScoreboard();
+            
+            messageEl.innerText = players.length > 1 
+                ? `Player ${players[currentPlayerIndex].id} Cleared!` 
+                : "Perfect! Great Job!";
+            messageEl.style.color = "var(--correct)";
+            nextBtn.style.display = "inline-block";
+            
+            // 全プレーヤーカードのアクティブを外す
+            document.querySelectorAll(".player-card").forEach(c => c.classList.remove("active"));
+        }
+    }
+
+    // タイトルに戻る処理
+    function backToTitle() {
+        // 確認ダイアログ
+        if(confirm("Exit to title screen? Score will be lost.")) {
+            // 画面の切り替え
+            gameScreen.style.display = "none";
+            setupScreen.style.display = "flex";
+            
+            // 状態のリセット
+            players = [];
+            currentWord = "";
+            wordContainer.innerHTML = "";
+            keyboard.innerHTML = "";
+            scoreboardEl.innerHTML = "";
+            messageEl.innerText = "";
+            currentPlayerIndex = 0;
+            isRoundOver = false;
+        }
+    }
+
+    // キーボード入力対応
+    document.addEventListener("keydown", (e) => {
+        if (isRoundOver || setupScreen.style.display !== "none") return;
+        const key = e.key.toUpperCase();
+        if (key.length === 1 && key >= "A" && key <= "Z") {
+            handleGuess(key);
+        }
+    });
+
+</script>
+
+</body>
+</html>
