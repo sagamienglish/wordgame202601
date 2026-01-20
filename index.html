@@ -59,8 +59,22 @@
         }
         
         .setup-group {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-align: center;
+        }
+
+        /* レッスン選択ボタン */
+        .lesson-btn {
+            font-size: 1.2rem; padding: 10px 25px; margin: 5px;
+            background: white; color: #555; border: 2px solid #ccc;
+            border-radius: 30px; cursor: pointer; transition: all 0.2s;
+            min-width: 120px;
+        }
+        .lesson-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .lesson-btn.active {
+            background: var(--accent); color: white; border-color: var(--accent);
+            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.3);
+            transform: scale(1.05);
         }
 
         /* 問題数選択スライダー/入力 */
@@ -271,6 +285,15 @@
 <div id="setup-screen">
     <h2 style="font-size: 28px; color:#333; margin-bottom:10px;">Vocabulary Game Setup</h2>
     
+    <!-- Lesson Selection -->
+    <div class="setup-group">
+        <label style="font-size: 18px; color: #666; font-weight:bold;">Select Lesson</label>
+        <div style="margin-top:10px;">
+            <button id="btn-l9" class="lesson-btn active" onclick="selectLesson('lesson9')">Lesson 9</button>
+            <button id="btn-l10" class="lesson-btn" onclick="selectLesson('lesson10')">Lesson 10</button>
+        </div>
+    </div>
+
     <div class="setup-group">
         <label style="font-size: 18px; color: #666; font-weight:bold;">Number of Questions</label>
         <div class="question-selector">
@@ -281,7 +304,7 @@
     </div>
 
     <div class="setup-group">
-        <p style="margin-bottom:10px; color:#666; font-weight:bold;">Select Players</p>
+        <p style="margin-bottom:10px; color:#666; font-weight:bold;">Select Players to Start</p>
         <div style="display:flex; flex-wrap:wrap; justify-content:center; max-width:600px;">
             <button class="player-btn" onclick="startGame(1)">1 Player</button>
             <button class="player-btn" onclick="startGame(2)">2 Players</button>
@@ -323,16 +346,27 @@
 </div>
 
 <script>
-    // 語彙リスト
-    const wordList = [
-        "newscaster", "spectator", "stare", "screen", "venue",
-        "participate", "set up", "compete", "organized", "term",
-        "popularity", "official", "sharply", "scholarship", "competition",
-        "committee", "commentator", "physical", "mental", "quick",
-        "response", "concentration", "strategy", "visa", "advantage",
-        "teamwork", "although", "afraid", "waste", "government",
-        "recognize", "strength"
-    ];
+    // 語彙データベース
+    const vocabularyData = {
+        lesson9: [
+            "newscaster", "spectator", "stare", "screen", "venue",
+            "participate", "set up", "compete", "organized", "term",
+            "popularity", "official", "sharply", "scholarship", "competition",
+            "committee", "commentator", "physical", "mental", "quick",
+            "response", "concentration", "strategy", "visa", "advantage",
+            "teamwork", "although", "afraid", "waste", "government",
+            "recognize", "strength"
+        ],
+        lesson10: [
+            "strongly", "tribe", "grade", "fit", "bully",
+            "ethnic", "childhood", "violent", "continent", "avoid",
+            "might", "behave", "attractive", "subject", "luckily",
+            "program", "expect", "Amazon", "region", "feature"
+        ]
+    };
+
+    // ゲーム設定
+    let selectedLesson = 'lesson9'; // デフォルト
 
     // ゲーム状態
     let players = [];
@@ -411,6 +445,14 @@
     }
 
     // --- セットアップ操作 ---
+    function selectLesson(lessonKey) {
+        selectedLesson = lessonKey;
+        // ボタンの見た目更新
+        document.querySelectorAll('.lesson-btn').forEach(btn => btn.classList.remove('active'));
+        if(lessonKey === 'lesson9') document.getElementById('btn-l9').classList.add('active');
+        if(lessonKey === 'lesson10') document.getElementById('btn-l10').classList.add('active');
+    }
+
     function adjustQuestions(delta) {
         let val = parseInt(qCountInput.value) + delta;
         if (val < 1) val = 1;
@@ -443,20 +485,18 @@
     function nextRound() {
         currentQuestionNum++;
         
-        // 最終問題かどうかのチェックはボタン表示時に行うが、
-        // ここではラウンド初期化
         revealedCount = 0;
         isRoundOver = false;
         
         roundInfoEl.innerText = `Q: ${currentQuestionNum} / ${totalQuestions}`;
         
-        // ボタン表示更新
         updateActionButton();
 
         messageEl.innerText = "";
         
-        // 単語選択（重複回避なしのランダム）
-        const rawWord = wordList[Math.floor(Math.random() * wordList.length)];
+        // 選択されたレッスンの単語リストを取得
+        const currentList = vocabularyData[selectedLesson];
+        const rawWord = currentList[Math.floor(Math.random() * currentList.length)];
         currentWord = rawWord.toUpperCase();
         
         renderScoreboard();
@@ -466,8 +506,6 @@
     }
 
     function updateActionButton() {
-        // 現在の問題が最終問題かつ、ラウンド終了後なら「Show Result」
-        // それ以外は「Next Word」（パス機能含む）
         if (currentQuestionNum >= totalQuestions) {
              actionBtn.innerText = isRoundOver ? "Show Results 🏆" : "Pass / Results ➡";
         } else {
@@ -476,12 +514,9 @@
     }
 
     function handleActionClick() {
-        // ボタンが押されたときの挙動
         if (currentQuestionNum >= totalQuestions) {
-            // 最終問題でボタンを押した -> 結果画面へ
             showResults();
         } else {
-            // まだ次がある -> 次の問題へ
             nextRound();
         }
     }
@@ -490,7 +525,6 @@
         gameScreen.style.display = "none";
         resultScreen.style.display = "flex";
         
-        // スコア順にソート
         const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
         
         finalScoresEl.innerHTML = "";
@@ -505,7 +539,6 @@
             } else if (index === 1) rankEmoji = "🥈 ";
             else if (index === 2) rankEmoji = "🥉 ";
 
-            // 結果画面でも変更後の名前を表示
             row.innerHTML = `
                 <span>${rankEmoji}${p.name}</span>
                 <span>${p.score} pts</span>
@@ -529,9 +562,9 @@
             
             const name = document.createElement("div");
             name.className = "p-name";
-            name.innerText = p.name; // 名前を表示
+            name.innerText = p.name; 
             name.title = "Click to rename";
-            name.onclick = (e) => { // 名前変更機能
+            name.onclick = (e) => { 
                 e.stopPropagation();
                 renamePlayer(index);
             };
@@ -546,14 +579,12 @@
         });
     }
     
-    // 名前変更関数
     function renamePlayer(index) {
         const currentName = players[index].name;
         const newName = prompt("Enter new name for Player:", currentName);
         if (newName && newName.trim() !== "") {
             players[index].name = newName.trim();
             renderScoreboard();
-            // 自分のターンの場合、メッセージも更新
             if (!isRoundOver && index === currentPlayerIndex) {
                 announceTurn();
             }
@@ -679,7 +710,6 @@
                 : "Perfect! Great Job!";
             messageEl.style.color = "var(--correct)";
             
-            // 全プレーヤーのアクティブ解除
             document.querySelectorAll(".player-card").forEach(c => c.classList.remove("active"));
             
             updateActionButton();
