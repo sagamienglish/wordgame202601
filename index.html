@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vocabulary Guessing Game (Fun Ver.)</title>
+    <title>Vocabulary Guessing Game (Lesson 9,10)</title>
     <style>
         :root {
             --correct: #6aaa64;
@@ -31,7 +31,7 @@
         header {
             background-color: white;
             width: 100%;
-            padding: 8px 0; /* ヘッダーの縦幅を少し縮小 */
+            padding: 5px 0; /* 8px -> 5px */
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: relative;
             z-index: 10;
@@ -42,15 +42,15 @@
             flex-shrink: 0;
         }
         
-        h1 { margin: 0; font-size: 18px; color: #444; }
+        h1 { margin: 0; font-size: 16px; color: #444; } /* 18px -> 16px */
         
         #round-info {
             position: absolute; right: 10px;
             font-weight: bold; color: white;
             background-color: var(--accent);
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 12px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
@@ -68,7 +68,6 @@
             text-align: center;
         }
 
-        /* レッスン選択ボタン */
         .lesson-btn {
             font-size: 1.2rem; padding: 10px 25px; margin: 5px;
             background: white; color: #555; border: 2px solid #ccc;
@@ -82,7 +81,6 @@
             transform: scale(1.05);
         }
 
-        /* 問題数選択スライダー/入力 */
         .question-selector {
             display: flex; align-items: center; justify-content: center; gap: 10px;
             margin-top: 10px;
@@ -108,7 +106,7 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            padding-top: 5px; /* 上部パディングを縮小 */
+            padding-top: 2px; /* 5px -> 2px */
             position: relative;
         }
 
@@ -139,15 +137,15 @@
             gap: 10px;
             width: 100%;
             max-width: 800px;
-            margin-bottom: 2px; /* 余白を削減 */
+            margin-bottom: 0px; /* 2px -> 0px */
             padding: 0 10px;
             flex-shrink: 0;
         }
 
         .player-card {
             background: white; border: 2px solid #ddd;
-            border-radius: 8px; padding: 5px 15px;
-            min-width: 80px;
+            border-radius: 8px; padding: 2px 10px; /* パディング縮小 */
+            min-width: 70px;
             display: flex; flex-direction: column; align-items: center;
             transition: all 0.3s;
             position: relative;
@@ -156,26 +154,25 @@
         .player-card.active {
             border-color: var(--accent);
             background-color: #e3f2fd;
-            transform: scale(1.15);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             z-index: 5;
         }
 
         .p-name { 
-            font-size: 14px; 
+            font-size: 12px; 
             font-weight: bold; 
             color: #555; 
             cursor: pointer;
             border-bottom: 1px dashed #aaa;
-            padding-bottom: 2px;
+            padding-bottom: 1px;
         }
         .p-name:hover {
             color: var(--accent);
             border-bottom-color: var(--accent);
         }
-        .p-score { font-size: 40px; font-weight: bold; color: var(--correct); line-height: 1.2; }
+        .p-score { font-size: 32px; font-weight: bold; color: var(--correct); line-height: 1.1; } /* 40px -> 32px */
 
-        /* スコアポップアップ */
         .score-popup {
             position: absolute;
             color: #ff9800;
@@ -197,10 +194,9 @@
             100% { transform: translateY(-60px) scale(1.0); opacity: 0; }
         }
 
-        /* メッセージエリア */
-        #info-bar { margin: 2px 0; min-height: 28px; flex-shrink: 0;} /* 余白を削減 */
+        #info-bar { margin: 0; min-height: 24px; flex-shrink: 0;} /* マージン0 */
         #message {
-            font-size: 18px; font-weight: bold; color: #555;
+            font-size: 16px; font-weight: bold; color: #555;
             transition: transform 0.2s;
         }
 
@@ -210,7 +206,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin: 5px 0 10px 0; /* 上下の余白を削減 */
+            margin: 2px 0 5px 0; /* 5px 0 10px 0 -> 2px 0 5px 0 (50%減) */
             padding: 0 20px;
             flex-grow: 1;
             align-content: center;
@@ -248,18 +244,18 @@
         /* キーボード */
         #keyboard { 
             width: 100%; max-width: 700px; 
-            padding: 2px 5px; /* パディングを削減 */
+            padding: 0 5px; /* 上下パディング0 */
             box-sizing: border-box; 
             flex-shrink: 0;
         }
-        .key-row { display: flex; justify-content: center; margin-bottom: 4px; }
+        .key-row { display: flex; justify-content: center; margin-bottom: 3px; }
         .key {
-            font-weight: bold; border: none; margin: 0 3px;
-            height: 48px; /* 高さを少し削減 */
+            font-weight: bold; border: none; margin: 0 2px;
+            height: 45px; /* 48px -> 45px */
             width: 9%; border-radius: 6px; cursor: pointer;
             background-color: white; border: 1px solid #ccc;
             color: #333; font-size: 18px;
-            box-shadow: 0 3px 0 #bbb;
+            box-shadow: 0 2px 0 #bbb;
             touch-action: manipulation;
             transition: transform 0.1s, background-color 0.2s;
         }
@@ -270,33 +266,32 @@
 
         /* コントロールボタン */
         #game-controls { 
-            margin-top: 5px; /* 上マージンを削減 */
-            margin-bottom: 15px; /* 下マージンを少し調整 */
+            margin-top: 3px; /* 5px -> 3px */
+            margin-bottom: 8px; /* 15px -> 8px */
             display: flex; 
             justify-content: center; 
             gap: 15px; 
-            min-height: 40px;
+            min-height: 35px;
             flex-shrink: 0;
         }
         .ctrl-btn {
-            padding: 10px 24px; font-size: 16px;
+            padding: 8px 20px; font-size: 14px; /* サイズ縮小 */
             background-color: var(--accent); color: white; border: none;
             border-radius: 25px; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
             transition: background 0.2s;
         }
         .ctrl-btn:hover { background-color: #1976D2; }
-        .ctrl-btn.reset { background-color: #757575; font-size: 14px; }
+        .ctrl-btn.reset { background-color: #757575; font-size: 12px; }
         
         #action-btn { display: inline-block; }
 
         /* スマホ/iPad用レスポンシブ調整 */
         @media (max-height: 800px) {
-            .char-box { width: 32px; height: 40px; font-size: 24px; }
-            .key { height: 42px; font-size: 16px; }
-            .p-score { font-size: 30px; }
-            header { padding: 5px 0; }
-            #word-container { margin: 5px 0; }
+            .char-box { width: 30px; height: 38px; font-size: 22px; }
+            .key { height: 40px; font-size: 16px; }
+            .p-score { font-size: 28px; }
+            #word-container { margin: 2px 0; }
         }
 
     </style>
@@ -305,19 +300,19 @@
 
 <!-- Setup Screen -->
 <div id="setup-screen">
-    <h2 style="font-size: 28px; color:#333; margin-bottom:10px;">Vocabulary Game Setup</h2>
+    <h2 style="font-size: 24px; color:#333; margin-bottom:10px;">Vocabulary Game Setup</h2>
     
     <!-- Lesson Selection -->
     <div class="setup-group">
-        <label style="font-size: 18px; color: #666; font-weight:bold;">Select Lesson</label>
-        <div style="margin-top:10px;">
+        <label style="font-size: 16px; color: #666; font-weight:bold;">Select Lesson</label>
+        <div style="margin-top:5px;">
             <button id="btn-l9" class="lesson-btn active" onclick="selectLesson('lesson9')">Lesson 9</button>
             <button id="btn-l10" class="lesson-btn" onclick="selectLesson('lesson10')">Lesson 10</button>
         </div>
     </div>
 
     <div class="setup-group">
-        <label style="font-size: 18px; color: #666; font-weight:bold;">Number of Questions</label>
+        <label style="font-size: 16px; color: #666; font-weight:bold;">Number of Questions</label>
         <div class="question-selector">
             <button onclick="adjustQuestions(-1)" style="font-size:20px; width:40px; height:40px; border-radius:50%; border:1px solid #ccc; background:white;">-</button>
             <input type="number" id="question-count" min="1" max="10" value="5" readonly>
@@ -326,7 +321,7 @@
     </div>
 
     <div class="setup-group">
-        <p style="margin-bottom:10px; color:#666; font-weight:bold;">Select Players to Start</p>
+        <p style="margin-bottom:5px; color:#666; font-weight:bold;">Select Players to Start</p>
         <div style="display:flex; flex-wrap:wrap; justify-content:center; max-width:600px;">
             <button class="player-btn" onclick="startGame(1)">1 Player</button>
             <button class="player-btn" onclick="startGame(2)">2 Players</button>
@@ -681,8 +676,8 @@
         initAudio();
 
         const btn = document.getElementById(`key-${char}`);
-        if (btn.disabled) return;
-        btn.disabled = true;
+        if (btn && btn.disabled) return; // btnが存在しない場合のエラー回避
+        if (btn) btn.disabled = true;
 
         if (currentWord.includes(char)) {
             playSound("correct");
@@ -702,14 +697,14 @@
             renderScoreboard(); 
             showScorePopup(gainedPoints, currentPlayerIndex); 
 
-            btn.classList.add("correct");
+            if(btn) btn.classList.add("correct");
             checkWin(); 
         } else {
             playSound("wrong");
             document.body.classList.add("anim-shake");
             setTimeout(() => document.body.classList.remove("anim-shake"), 400);
 
-            btn.classList.add("wrong");
+            if(btn) btn.classList.add("wrong");
             renderScoreboard();
         }
 
@@ -738,12 +733,7 @@
             isRoundOver = true;
             playSound("win");
             
-            // ボーナス廃止（ここを削除）
-            // const bonus = 50;
-            // players[currentPlayerIndex].score += bonus;
-            
             renderScoreboard();
-            // showScorePopup(bonus, currentPlayerIndex);
 
             messageEl.innerText = players.length > 1 
                 ? `${players[currentPlayerIndex].name} Cleared!` 
