@@ -31,7 +31,7 @@
         header {
             background-color: white;
             width: 100%;
-            padding: 5px 0; /* 8px -> 5px */
+            padding: 5px 0;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: relative;
             z-index: 10;
@@ -42,7 +42,7 @@
             flex-shrink: 0;
         }
         
-        h1 { margin: 0; font-size: 16px; color: #444; } /* 18px -> 16px */
+        h1 { margin: 0; font-size: 16px; color: #444; }
         
         #round-info {
             position: absolute; right: 10px;
@@ -106,8 +106,9 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            padding-top: 2px; /* 5px -> 2px */
+            padding-top: 2px;
             position: relative;
+            /* justify-content: flex-start;  デフォルトで上詰めにする */
         }
 
         /* --- 結果画面 --- */
@@ -137,14 +138,14 @@
             gap: 10px;
             width: 100%;
             max-width: 800px;
-            margin-bottom: 0px; /* 2px -> 0px */
+            margin-bottom: 0px;
             padding: 0 10px;
             flex-shrink: 0;
         }
 
         .player-card {
             background: white; border: 2px solid #ddd;
-            border-radius: 8px; padding: 2px 10px; /* パディング縮小 */
+            border-radius: 8px; padding: 2px 10px;
             min-width: 70px;
             display: flex; flex-direction: column; align-items: center;
             transition: all 0.3s;
@@ -171,7 +172,7 @@
             color: var(--accent);
             border-bottom-color: var(--accent);
         }
-        .p-score { font-size: 32px; font-weight: bold; color: var(--correct); line-height: 1.1; } /* 40px -> 32px */
+        .p-score { font-size: 32px; font-weight: bold; color: var(--correct); line-height: 1.1; }
 
         .score-popup {
             position: absolute;
@@ -194,7 +195,7 @@
             100% { transform: translateY(-60px) scale(1.0); opacity: 0; }
         }
 
-        #info-bar { margin: 0; min-height: 24px; flex-shrink: 0;} /* マージン0 */
+        #info-bar { margin: 0; min-height: 24px; flex-shrink: 0;}
         #message {
             font-size: 16px; font-weight: bold; color: #555;
             transition: transform 0.2s;
@@ -206,9 +207,9 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 8px;
-            margin: 20px 0; /* 固定値に変更: 20px */
+            margin: 20px 0; /* 固定値: 20px */
             padding: 0 20px;
-            flex-grow: 1;
+            flex-grow: 0; /* ★自動で伸びないように変更★ */
             align-content: center;
         }
 
@@ -244,14 +245,14 @@
         /* キーボード */
         #keyboard { 
             width: 100%; max-width: 700px; 
-            padding: 0 5px; /* 上下パディング0 */
+            padding: 0 5px;
             box-sizing: border-box; 
             flex-shrink: 0;
         }
         .key-row { display: flex; justify-content: center; margin-bottom: 3px; }
         .key {
             font-weight: bold; border: none; margin: 0 2px;
-            height: 45px; /* 48px -> 45px */
+            height: 45px;
             width: 9%; border-radius: 6px; cursor: pointer;
             background-color: white; border: 1px solid #ccc;
             color: #333; font-size: 18px;
@@ -266,8 +267,8 @@
 
         /* コントロールボタン */
         #game-controls { 
-            margin-top: 3px; /* 5px -> 3px */
-            margin-bottom: 8px; /* 15px -> 8px */
+            margin-top: 3px;
+            margin-bottom: 8px;
             display: flex; 
             justify-content: center; 
             gap: 15px; 
@@ -275,7 +276,7 @@
             flex-shrink: 0;
         }
         .ctrl-btn {
-            padding: 8px 20px; font-size: 14px; /* サイズ縮小 */
+            padding: 8px 20px; font-size: 14px;
             background-color: var(--accent); color: white; border: none;
             border-radius: 25px; cursor: pointer;
             box-shadow: 0 3px 5px rgba(0,0,0,0.2);
@@ -291,7 +292,6 @@
             .char-box { width: 30px; height: 38px; font-size: 22px; }
             .key { height: 40px; font-size: 16px; }
             .p-score { font-size: 28px; }
-            /* #word-container { margin: 2px 0; }  <-- 削除して20pxを優先 */
         }
 
     </style>
